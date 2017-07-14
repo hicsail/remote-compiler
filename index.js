@@ -15,7 +15,7 @@ server.route({
     config: {
         validate: {
             payload: {
-                language: Joi.string().allow('javascript').required(),
+                language: Joi.string().allow('javascript','java').required(),
                 code: Joi.string().required()
             }
         }
@@ -33,23 +33,19 @@ server.route({
                     callback();
                 });
             }],
+            file: ['ID', function (results,callback) {
+                callback(null, `./code/${results.ID}/${getFileName(request.payload.language)}`);
+            }],
             makeFile: ['createDir', function (results,callback) {
-                var filePath = `./code/${results.ID}/${getFileName(request.payload.language)}`;
-                fs.writeFile(filePath, request.payload.code,(err, result) => {
-                    if(err) {
-                        return callback(err);
-                    }
-                    callback(null,filePath);
-                });
+                fs.writeFile(results.file, request.payload.code,callback);
             }],
             runCode: ['makeFile', function (results,callback) {
-                var start = getStartScript(request.payload.language);
-                exec(`sh ${start} ${results.makeFile}`, (err, stdout, stderr) => {
-                    if(err){
-                        return callback(err);
-                    }
+                exec(`sh ./scripts/${request.payload.language}.sh ${results.file}`, (err, stdout, stderr) => {
                     if(stderr){
                         return callback(stderr);
+                    }
+                    if(err){
+                        return callback(err);
                     }
                     callback(null,stdout);
                 });
@@ -57,7 +53,7 @@ server.route({
         },(err, results) => {
             removeDir(results.ID);
             if(err){
-               return reply(err);
+                return reply(err);
             }
             reply(results.runCode);
         });
@@ -74,13 +70,8 @@ function getFileName(language) {
     switch(language) {
         case 'javascript':
             return 'index.js';
-    }
-}
-
-function getStartScript(language) {
-    switch(language) {
-        case 'javascript':
-            return './scripts/javascript.sh';
+        case 'java':
+            return 'Index.java';
     }
 }
 
