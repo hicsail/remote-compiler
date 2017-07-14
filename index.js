@@ -72,6 +72,8 @@ function getFileName(language) {
             return 'index.js';
         case 'java':
             return 'Index.java';
+        case 'python':
+            return 'index.py';
     }
 }
 
