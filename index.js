@@ -5,9 +5,22 @@ const Joi = require('joi');
 const uuidv4 = require('uuid/v4');
 const { exec } = require('child_process');
 const fs = require('fs');
-
 const server = new Hapi.Server();
+
 server.connection({ port: 8000, host: 'localhost' });
+
+server.route({
+    method: 'GET',
+    path: '/languages',
+    handler: function (request, reply) {
+        return reply([
+            'javascript',
+            'java',
+            'python'
+        ]);
+    }
+});
+
 
 server.route({
     method: 'POST',
@@ -15,7 +28,7 @@ server.route({
     config: {
         validate: {
             payload: {
-                language: Joi.string().allow('javascript','java').required(),
+                language: Joi.string().only('javascript','java','python').required(),
                 code: Joi.string().required()
             }
         }
@@ -26,7 +39,7 @@ server.route({
                 callback(null,uuidv4());
             },
             createDir: ['ID', function (results,callback) {
-                exec(`mkdir -p ./code/${results.ID}`, (err, stdout, stderr) => {
+                exec(`mkdir -p ./temp/${results.ID}`, (err, stdout, stderr) => {
                     if (err) {
                         return callback(err);
                     }
@@ -34,7 +47,7 @@ server.route({
                 });
             }],
             file: ['ID', function (results,callback) {
-                callback(null, `./code/${results.ID}/${getFileName(request.payload.language)}`);
+                callback(null, `./temp/${results.ID}/${getFileName(request.payload.language)}`);
             }],
             makeFile: ['createDir', function (results,callback) {
                 fs.writeFile(results.file, request.payload.code,callback);
@@ -61,7 +74,7 @@ server.route({
 });
 
 function removeDir(ID) {
-    exec(`rm -r ./code/${ID}`, (err, stdout, stderr) => {
+    exec(`rm -r ./temp/${ID}`, (err, stdout, stderr) => {
 
     });
 }
