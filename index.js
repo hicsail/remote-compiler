@@ -14,12 +14,26 @@ server.route({
     path: '/languages',
     handler: function (request, reply) {
         return reply([
-            'javascript',
+            'node',
             'java',
             'python'
         ]);
     }
 });
+
+server.route({
+    method: 'GET',
+    path: '/version',
+    handler: function (request, reply) {
+        exec(`sh ./scripts/version.sh`, (err, stdout, stderr) => {
+            if (err) {
+                return reply(err);
+            }
+            reply(JSON.parse(stdout));
+        });
+    }
+});
+
 
 
 server.route({
@@ -28,7 +42,7 @@ server.route({
     config: {
         validate: {
             payload: {
-                language: Joi.string().only('javascript','java','python').required(),
+                language: Joi.string().only('node','java','python').required(),
                 code: Joi.string().required()
             }
         }
@@ -81,7 +95,7 @@ function removeDir(ID) {
 
 function getFileName(language) {
     switch(language) {
-        case 'javascript':
+        case 'node':
             return 'index.js';
         case 'java':
             return 'Index.java';
