@@ -13,4 +13,4 @@ RUN npm install -g pm2
 
 EXPOSE 8000
 
-CMD pm2 start index.js --no-daemon -i 0
+CMD pm2 start index.js --no-daemon

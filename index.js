@@ -4,6 +4,7 @@ const Hapi = require('hapi');
 const Joi = require('joi');
 const uuidv4 = require('uuid/v4');
 const { exec } = require('child_process');
+const fs = require('fs');
 
 const server = new Hapi.Server();
 server.connection({ port: 8000, host: 'localhost' });
@@ -33,27 +34,53 @@ server.route({
                 });
             }],
             makeFile: ['createDir', function (results,callback) {
-                exec(`echo ${request.payload.code} > ./code/${results.ID}/${getFileName(request.payload.language)}`, (err, stdout, stderr) => {
-                    if (err) {
-                        console.log(stdout,stderr)
+                var filePath = `./code/${results.ID}/${getFileName(request.payload.language)}`;
+                fs.writeFile(filePath, request.payload.code,(err, result) => {
+                    if(err) {
                         return callback(err);
                     }
-                    callback();
+                    callback(null,filePath);
+                });
+            }],
+            runCode: ['makeFile', function (results,callback) {
+                var start = getStartScript(request.payload.language);
+                exec(`sh ${start} ${results.makeFile}`, (err, stdout, stderr) => {
+                    if(err){
+                        return callback(err);
+                    }
+                    if(stderr){
+                        return callback(stderr);
+                    }
+                    callback(null,stdout);
                 });
             }]
         },(err, results) => {
-           if(err){
+            removeDir(results.ID);
+            if(err){
                return reply(err);
-           }
-           reply(results);
+            }
+            reply(results.runCode);
         });
     }
 });
+
+function removeDir(ID) {
+    exec(`rm -r ./code/${ID}`, (err, stdout, stderr) => {
+
+    });
+}
 
 function getFileName(language) {
     switch(language) {
         case 'javascript':
             return 'index.js';
+    }
+}
+
+function getStartScript(language) {
+    switch(language) {
+        case 'javascript':
+            return './scripts/javascript.sh';
     }
 }
 
