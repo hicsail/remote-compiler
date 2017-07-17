@@ -1,11 +1,11 @@
 public class Index {
 
     public static void main(String[] args) {
-        myCustomFunction();
-    }
 
-    private myCustomFunction() {
-        System.out.println("Hello World");
+        String[] inputs = args[0].split(",");
+        
+        for(String input: inputs) {
+            System.out.println(input);
+        }
     }
-
 }
