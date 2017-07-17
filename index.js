@@ -6,8 +6,38 @@ const uuidv4 = require('uuid/v4');
 const { exec } = require('child_process');
 const fs = require('fs');
 const server = new Hapi.Server();
+const Inert = require('inert');
+
+server.register([require('vision'),Inert], (err) => {
+
+    server.views({
+        engines: { html: require('handlebars') },
+        path: __dirname + '/views',
+        layout: 'layout',
+        layoutPath: __dirname + '/views'
+    });
+});
 
 server.connection({ port: 8000, host: 'localhost' });
+
+server.route({
+    method: 'GET',
+    path: '/public/{param*}',
+    handler: {
+        directory: {
+            path: __dirname + '/public',
+            listing: true
+        }
+    }
+});
+
+server.route({
+    method: 'GET',
+    path: '/',
+    handler: function (request, reply) {
+        return reply.view('home');
+    }
+});
 
 server.route({
     method: 'GET',

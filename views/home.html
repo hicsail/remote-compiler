@@ -1,0 +1,25 @@
+<h1>Remote Compile</h1>
+
+<div id="code"></div>
+
+<script type="text/javascript">
+    CodeMirror.commands.autocomplete = function(cm) {
+        CodeMirror.showHint(cm, CodeMirror.hint.html);
+    }
+    window.onload = function() {
+        editor = CodeMirror(document.getElementById("code"), {
+            mode: "text/html",
+            theme: "neonsyntax",
+            lineWrapping: true,
+            lineNumbers: true,
+            styleActiveLine: true,
+            matchBrackets: true,
+            extraKeys: {
+                "Ctrl-Space": "autocomplete"
+            },
+            value: "<!doctype html>\n<html>\n  " + "TESTING" + "\n</html>"
+        });
+    };
+</script>
+
+
