@@ -120,13 +120,13 @@ server.route({
       }],
       runCode: ['makeFile', function (results,callback) {
 
-        exec(`sh ./scripts/${results.payload.language}.sh ${results.file} ${results.payload.inputs}`, (err, stdout, stderr) => {
+        exec(`sh ./scripts/${results.payload.language}.sh ${results.file} ${results.payload.inputs}`,{timeout: 2000}, (err, stdout, stderr) => {
 
           if(stderr){
             return callback(stderr);
           }
           if(err){
-            return callback(err);
+            return callback(err.stack);
           }
           callback(null,stdout);
         });
