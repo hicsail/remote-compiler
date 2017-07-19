@@ -35,6 +35,19 @@ server.route({
 
 server.route({
   method: 'GET',
+  path: '/template/{language*}',
+  handler: function (request, reply) {
+
+    if(Languages.indexOf(request.params.language) == -1){
+      return reply(Boom.notFound('Language Not Found'));
+    }
+    var test = `${__dirname}/templates/${getFileName(request.params.language)}`;
+    reply.file(test);
+  }
+});
+
+server.route({
+  method: 'GET',
   path: '/',
   handler: function (request, reply) {
 
